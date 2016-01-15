@@ -11,6 +11,13 @@ devise-argon2 [![Build Status](https://secure.travis-ci.org/erdostom/devise-argo
 [devise]: https://github.com/plataformatec/devise
 [devise-encryptable]: https://github.com/plataformatec/devise-encryptable
 
+## Why use Argon2?
+
+Argon2 won Password Hashing Competition and offers additional security compared to the default `bcrypt` by adding a memory cost. More info:
+
+- https://github.com/P-H-C/phc-winner-argon2
+- https://hynek.me/articles/storing-passwords/
+
 ## Usage
 
 Assuming you have [devise] (>= 2.1) and the [devise-encryptable] plugin
