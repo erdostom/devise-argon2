@@ -9,7 +9,7 @@ describe Devise::Encryptable::Encryptors::Argon2 do
   let(:stretches) { 10 }
 
   describe ".compare" do
-    let(:encrypted) { Argon2::Password.hash("#{password}#{salt}#{pepper}").to_s }
+    let(:encrypted) { Argon2::Password.create("#{password}#{salt}#{pepper}").to_s }
 
     it "is true when comparing an encrypted password against given plaintext" do
       expect(argon2.compare(encrypted, password, stretches, salt, pepper)).to be true
