@@ -11,6 +11,10 @@ describe Devise::Encryptable::Encryptors::Argon2 do
   describe ".compare" do
     let(:encrypted) { Argon2::Password.create("#{password}#{salt}#{pepper}").to_s }
 
+    it "is true when the encrypted password contains the argon2id format" do
+      expect(encrypted).to match /argon2id/
+    end    
+
     it "is true when comparing an encrypted password against given plaintext" do
       expect(argon2.compare(encrypted, password, stretches, salt, pepper)).to be true
     end
