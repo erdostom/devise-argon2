@@ -38,7 +38,6 @@ describe Devise::Encryptable::Encryptors::Argon2 do
       let(:encrypted) { Argon2::Password.create(password).to_s }
       let(:salt) { nil }
       let(:pepper) { nil }
-      let(:encrypted) { Argon2::Password.create(password).to_s }
 
       it "is still works" do
         expect(argon2.compare(encrypted, password, stretches, salt, pepper)).to be true
