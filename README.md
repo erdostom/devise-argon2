@@ -34,8 +34,19 @@ Then open up your [devise] configuration,`config/initializers/devise.rb` and con
       # ...
     end
 
-It is also recommended to uncomment (or add) `config.pepper` with a random
-string that will be used in addition to the per-user `password_salt` when hashing.
+### Salts
+
+[Argon2 doesn't require using a salt](https://github.com/technion/ruby-argon2#salts-in-general), but `devise-encryptable` does. If you really don't want to use salts, you can do the following:
+
+````
+# app/models/user.rb
+def password_salt
+  'no salt'
+end
+
+def password_salt=(new_salt)
+end
+````
 
 ## Contributing
 
