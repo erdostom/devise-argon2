@@ -1,4 +1,4 @@
-devise-argon2 [![Build Status](https://secure.travis-ci.org/erdostom/devise-argon2.png)][Continuous Integration] [![Gem Version](https://badge.fury.io/rb/devise-argon2.svg)](https://badge.fury.io/rb/devise-argon2)
+devise-argon2 [![Build Status](https://secure.travis-ci.org/erdostom/devise-argon2.png)][Continuous Integration] [![Gem Version](https://badge.fury.io/rb/devise-argon2.svg)](https://badge.fury.io/rb/devise-argon2)  ![](https://ruby-gem-downloads-badge.herokuapp.com/devise-argon2?type=total)
 =============
 
 **A [devise-encryptable] password encryptor that uses [argon2]**
