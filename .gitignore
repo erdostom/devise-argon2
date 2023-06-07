@@ -12,6 +12,9 @@ lib/bundler/man
 pkg
 rdoc
 spec/reports
+spec/rails_app/log/*
+spec/rails_app/tmp/*
+spec/rails_app/db/test.sqlite3
 test/tmp
 test/version_tmp
 tmp
