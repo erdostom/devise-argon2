@@ -19,7 +19,4 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency 'devise', '>= 2.1.0'
   gem.add_dependency 'argon2', '~> 2.0'
-
-  gem.add_development_dependency 'activerecord'
-  gem.add_development_dependency 'sqlite3'
 end
