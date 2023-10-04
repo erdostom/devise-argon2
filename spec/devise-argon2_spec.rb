@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'spec_helper'
+require 'bcrypt'
 
 describe Devise::Models::Argon2 do
   CORRECT_PASSWORD = 'Tr0ub4dor&3'
@@ -58,6 +59,36 @@ describe Devise::Models::Argon2 do
       end
 
       include_examples 'a password is validated if and only if it is correct'
+    end
+
+    context 'encrypted_password is a BCrypt hash' do
+      before do
+        Devise.pepper = 'devise pepper'
+        Devise.argon2_options.merge!({ secret: 'argon2 secret' })
+
+        # Devise peppers by concatenating password and pepper:
+        # https://github.com/heartcombo/devise/blob/main/lib/devise/encryptor.rb
+        bcrypt_hash = BCrypt::Password.create("#{CORRECT_PASSWORD}#{Devise.pepper}", cost: 4)
+
+        user.encrypted_password = bcrypt_hash
+      end
+
+      include_examples 'a password is validated if and only if it is correct'
+
+      it 'updates hash if valid password is given' do
+        expect{ user.valid_password?(CORRECT_PASSWORD) }.to(change(user, :encrypted_password))
+        expect(
+          ::Argon2::Password.verify_password(
+            CORRECT_PASSWORD,
+            user.encrypted_password,
+            'argon2 secret'
+          )
+        ).to be true
+      end
+
+      it 'does not update the hash if an invalid password is given' do
+        expect{ user.valid_password?(INCORRECT_PASSWORD) }.not_to(change(user, :encrypted_password))
+      end
     end
 
     describe 'updating outdated work factors' do

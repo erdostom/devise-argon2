@@ -4,10 +4,16 @@ module Devise
   module Models
     module Argon2
       def valid_password?(password)
-        argon2_secret = (self.class.argon2_options[:secret] || self.class.pepper)
-        is_valid = ::Argon2::Password.verify_password(password, encrypted_password, argon2_secret)
-        update_encrypted_password(password) if is_valid && outdated_work_factors?
-        is_valid
+        if ::Argon2::Password.valid_hash?(encrypted_password)
+          argon2_secret = (self.class.argon2_options[:secret] || self.class.pepper)
+          is_valid = ::Argon2::Password.verify_password(password, encrypted_password, argon2_secret)
+          update_encrypted_password(password) if is_valid && outdated_work_factors?
+          is_valid
+        else
+          is_valid = super
+          update_encrypted_password(password) if is_valid
+          is_valid
+        end
       end
 
       protected
