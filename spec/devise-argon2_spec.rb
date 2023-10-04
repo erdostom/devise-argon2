@@ -4,12 +4,29 @@ require 'spec_helper'
 describe Devise::Models::Argon2 do
   CORRECT_PASSWORD = 'Tr0ub4dor&3'
   INCORRECT_PASSWORD = 'wrong'
+  DEFAULT_M_COST = 3
+  DEFAULT_T_COST = 1
+  DEFAULT_P_COST = 1
 
   let(:user) { User.new(password: CORRECT_PASSWORD) }
 
   before do
     Devise.pepper = nil
-    Devise.argon2_options = { m_cost: 3, t_cost: 1, p_cost: 1 }
+    Devise.argon2_options = {
+      m_cost: DEFAULT_M_COST,
+      t_cost: DEFAULT_T_COST,
+      p_cost: DEFAULT_P_COST
+    }
+    User.destroy_all
+  end
+
+  def work_factors(hash)
+    hash_format = Argon2::HashFormat.new(hash)
+    {
+      m_cost: hash_format.m_cost,
+      t_cost: hash_format.t_cost,
+      p_cost: hash_format.p_cost
+    }
   end
 
   describe 'valid_password?' do
@@ -41,6 +58,53 @@ describe Devise::Models::Argon2 do
       end
 
       include_examples 'a password is validated if and only if it is correct'
+    end
+
+    describe 'updating outdated work factors' do
+      it 'updates work factors if a valid password is given' do
+        user # build user
+
+        Devise.argon2_options.merge!({
+          m_cost: 4,
+          t_cost: 3,
+          p_cost: 2
+        })
+
+        expect{ user.valid_password?(CORRECT_PASSWORD) }.to(
+          change{ work_factors(user.encrypted_password) }
+            .from({ m_cost: 1 << DEFAULT_M_COST, t_cost: DEFAULT_T_COST, p_cost: DEFAULT_P_COST})
+            .to({ m_cost: 1 << 4, t_cost: 3, p_cost: 2 })
+        )
+      end
+
+      it 'does not update work factors if an invalid password is given' do
+        user # build user
+
+        Devise.argon2_options.merge!({
+          m_cost: 4,
+          t_cost: 3,
+          p_cost: 2
+        })
+
+        expect{ user.valid_password?(INCORRECT_PASSWORD) }
+          .not_to change{ work_factors(user.encrypted_password) }
+      end
+
+      it 'updates work factors for a persisted user' do
+        user.save!
+
+        Devise.argon2_options.merge!({
+          m_cost: 4,
+          t_cost: 3,
+          p_cost: 2
+        })
+
+        expect{ user.valid_password?(CORRECT_PASSWORD) }.to(
+          change{ work_factors(user.encrypted_password) }
+            .from({ m_cost: 1 << DEFAULT_M_COST, t_cost: DEFAULT_T_COST, p_cost: DEFAULT_P_COST})
+            .to({ m_cost: 1 << 4, t_cost: 3, p_cost: 2 })
+        )
+      end
     end
   end
 
@@ -101,11 +165,9 @@ describe Devise::Models::Argon2 do
         p_cost: 2
       })
 
-      hash_format = Argon2::HashFormat.new(user.encrypted_password)
-      
-      expect(hash_format.m_cost).to eq(1 << 4)
-      expect(hash_format.t_cost).to eq(3)
-      expect(hash_format.p_cost).to eq(2)
+      expect(work_factors(user.encrypted_password)).to eq(
+        { m_cost: 1 << 4, t_cost: 3, p_cost: 2 }
+      )
     end
   end
 end
