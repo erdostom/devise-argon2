@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version       = Devise::Argon2::ARGON2_VERSION
   gem.authors       = ["Tamas Erdos"]
   gem.email         = ["tamas at tamaserdos com"]
-  gem.description   = %q{A devise-encryptable password encryptor that uses Argon2}
-  gem.summary       = %q{A devise-encryptable password encryptor that uses Argon2}
+  gem.description   = %q{Enables Devise to hash passwords with Argon2id}
+  gem.summary       = %q{Enables Devise to hash passwords with Argon2id}
   gem.homepage      = "https://github.com/erdostom/devise-argon2"
 
   gem.files         = `git ls-files`.split($/)
