@@ -9,6 +9,7 @@ describe Devise::Models::Argon2 do
 
   before do
     Devise.pepper = nil
+    Devise.argon2_options = { m_cost: 3, t_cost: 1, p_cost: 1 }
   end
 
   describe 'valid_password?' do
@@ -29,6 +30,14 @@ describe Devise::Models::Argon2 do
     context 'Devise.pepper is set' do
       before do
         Devise.pepper = 'pepper'
+      end
+
+      include_examples 'a password is validated if and only if it is correct'
+    end
+
+    context 'argon2_options[:secret] is set' do
+      before do
+        Devise.argon2_options[:secret] = 'pepper'
       end
 
       include_examples 'a password is validated if and only if it is correct'
@@ -54,6 +63,49 @@ describe Devise::Models::Argon2 do
           Argon2::Password.verify_password(CORRECT_PASSWORD, user.encrypted_password, 'pepper')
         ).to be true
       end
+    end
+
+    context 'argon2_options[:secret] is set' do
+      before do
+        Devise.argon2_options[:secret] = 'pepper'
+      end
+
+      it 'uses argon2_options[:secret] as secret key for Argon2' do
+        expect(
+          Argon2::Password.verify_password(CORRECT_PASSWORD, user.encrypted_password, 'pepper')
+        ).to be true
+      end
+    end
+
+    context 'both Devise.pepper and argon2_options[:secret] are set' do
+      before do
+        Devise.pepper = 'devise pepper'
+        Devise.argon2_options[:secret] = 'argon2_options pepper'
+      end
+
+      it 'uses argon2_options[:secret] as secret key for Argon2' do
+        expect(
+          Argon2::Password.verify_password(
+            CORRECT_PASSWORD,
+            user.encrypted_password,
+            'argon2_options pepper'
+          )
+        ).to be true
+      end
+    end
+
+    it 'uses work factors given in argon2_options' do
+      Devise.argon2_options.merge!({
+        m_cost: 4,
+        t_cost: 3,
+        p_cost: 2
+      })
+
+      hash_format = Argon2::HashFormat.new(user.encrypted_password)
+      
+      expect(hash_format.m_cost).to eq(1 << 4)
+      expect(hash_format.t_cost).to eq(3)
+      expect(hash_format.p_cost).to eq(2)
     end
   end
 end
