@@ -91,6 +91,44 @@ describe Devise::Models::Argon2 do
       end
     end
 
+    context 'encrypted_password is hashed with version 1 of devise-argon2' do
+      let(:user) { OldUser.new(password: CORRECT_PASSWORD) }
+
+      before do
+        Devise.pepper = 'devise pepper'
+        Devise.argon2_options.merge!({
+          secret: 'argon2 secret',
+          migrate_from_devise_argon2_v1: true
+        })
+
+        user.password_salt = 'devise-argon2 v1 salt'
+        user.encrypted_password = ::Argon2::Password.create(
+          "#{CORRECT_PASSWORD}#{user.password_salt}#{Devise.pepper}"
+        )
+      end
+
+      include_examples 'a password is validated if and only if it is correct'
+
+      it 'updates hash once if valid password is given' do
+        expect{ user.valid_password?(CORRECT_PASSWORD) }.to(
+          change(user, :encrypted_password)
+          .and(change(user, :password_salt).to(nil))
+        )
+        expect(
+          ::Argon2::Password.verify_password(
+            CORRECT_PASSWORD,
+            user.encrypted_password,
+            'argon2 secret'
+          )
+        ).to be true
+        expect{ user.valid_password?(CORRECT_PASSWORD) }.not_to(change(user, :encrypted_password))
+      end
+
+      it 'does not update the hash if an invalid password is given' do
+        expect{ user.valid_password?(INCORRECT_PASSWORD) }.not_to(change(user, :encrypted_password))
+      end
+    end
+
     describe 'updating outdated work factors' do
       it 'updates work factors if a valid password is given' do
         user # build user
@@ -136,6 +174,11 @@ describe Devise::Models::Argon2 do
             .to({ m_cost: 1 << 4, t_cost: 3, p_cost: 2 })
         )
       end
+    end
+
+    it 'ignores migrate_from_devise_argon2_v1 if password_salt is not present' do
+      Devise.argon2_options.merge!({ migrate_from_devise_argon2_v1: true })
+      expect{ user.valid_password?(CORRECT_PASSWORD) }.not_to(change(user, :encrypted_password))
     end
   end
 

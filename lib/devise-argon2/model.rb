@@ -4,34 +4,51 @@ module Devise
   module Models
     module Argon2
       def valid_password?(password)
+        is_valid = hash_needs_update = false
+        
         if ::Argon2::Password.valid_hash?(encrypted_password)
-          argon2_secret = (self.class.argon2_options[:secret] || self.class.pepper)
-          is_valid = ::Argon2::Password.verify_password(password, encrypted_password, argon2_secret)
-          update_encrypted_password(password) if is_valid && outdated_work_factors?
-          is_valid
+          if migrate_hash_from_devise_argon2_v1?
+            is_valid = ::Argon2::Password.verify_password(
+              "#{password}#{password_salt}#{self.class.pepper}",
+              encrypted_password
+            )
+            hash_needs_update = true
+          else
+            argon2_secret = (self.class.argon2_options[:secret] || self.class.pepper)
+            is_valid = ::Argon2::Password.verify_password(
+              password,
+              encrypted_password,
+              argon2_secret
+            )
+            hash_needs_update = outdated_work_factors?
+          end
         else
           is_valid = super
-          update_encrypted_password(password) if is_valid
-          is_valid
+          hash_needs_update = true
         end
+
+        update_hash(password) if is_valid && hash_needs_update
+
+        is_valid
       end
 
       protected
 
       def password_digest(password)
-        hasher_options = { secret: self.class.pepper }.merge(self.class.argon2_options)
+        hasher_options = self.class.argon2_options.except(:migrate_from_devise_argon2_v1)
+        hasher_options[:secret] ||= self.class.pepper
         hasher = ::Argon2::Password.new(hasher_options)
         hasher.create(password)
       end
 
       private
 
-      def update_encrypted_password(password)
-        if self.new_record?
-          self.encrypted_password = password_digest(password)
-        else
-          self.update_attribute('encrypted_password', password_digest(password))
-        end
+      def update_hash(password)
+        attributes = { encrypted_password: password_digest(password) }
+        attributes[:password_salt] = nil if migrate_hash_from_devise_argon2_v1?
+
+        self.assign_attributes(attributes)
+        self.save if self.persisted?
       end
 
       def outdated_work_factors?
@@ -50,6 +67,12 @@ module Devise
         hash_format.t_cost != current_t_cost ||
           hash_format.m_cost != (1 << current_m_cost) ||
           hash_format.p_cost != current_p_cost
+      end
+
+      def migrate_hash_from_devise_argon2_v1?
+        self.class.argon2_options[:migrate_from_devise_argon2_v1] &&
+          defined?(password_salt) &&
+          password_salt
       end
 
       module ClassMethods
