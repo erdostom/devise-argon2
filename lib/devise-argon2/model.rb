@@ -23,6 +23,12 @@ module Devise
             hash_needs_update = outdated_work_factors?
           end
         else
+          # Devise models are included in a fixed order, see
+          # https://github.com/heartcombo/devise/blob/f6e73e5b5c8f519f4be29ac9069c6ed8a2343ce4/lib/devise/models.rb#L79.
+          # Since we don't specify where this model should be inserted when we call add_module,
+          # it will be inserted at the end, i.e. after DatabaseAuthenticatable (see
+          # https://github.com/heartcombo/devise/blob/f6e73e5b5c8f519f4be29ac9069c6ed8a2343ce4/lib/devise.rb#L393). 
+          # So we can call DatabaseAuthenticable's valid_password? with super.
           is_valid = super
           hash_needs_update = true
         end
