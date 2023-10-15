@@ -7,6 +7,7 @@ Bundler.require :default, ORM
 require "action_controller/railtie"
 
 require "#{ORM}/railtie"
+require "action_mailer/railtie"
 require 'devise-argon2'
 
 # Require the gems listed in Gemfile, including any gems
