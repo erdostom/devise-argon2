@@ -1,0 +1,10 @@
+test:
+  clients:
+    default:
+      database: dummy_rails_app_test
+      hosts:
+        - localhost:27017
+      options:
+        read:
+          mode: :primary
+        max_pool_size: 1
