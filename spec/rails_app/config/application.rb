@@ -1,8 +1,13 @@
 ORM = (ENV['ORM'] || 'active_record')
-p ENV['ORM']
 
 require "rails"
-require "active_record/railtie" if ORM == 'active_record'
+
+Bundler.require :default, ORM
+
+require "action_controller/railtie"
+
+require "#{ORM}/railtie"
+require 'devise-argon2'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -12,6 +17,7 @@ module DummyRailsApp
   class Application < Rails::Application
     config.load_defaults Rails.version.match(/^\d.\d/)[0]
     config.eager_load = false
-    config.autoload_paths += ["#{Rails.root}/app/models/#{ORM}_orm"]
+    config.autoload_paths.reject!{ |p| p =~ /\/app\/(\w+)$/ && !%w(controllers helpers mailers views).include?($1) }
+    config.autoload_paths += ["#{config.root}/app/#{ORM}"]
   end
 end
