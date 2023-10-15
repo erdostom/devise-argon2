@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         ruby-version: ['2.7', '3.0', '3.1', '3.2', 'ruby-head']
-        rails-version: ['~> 7.1', '~> 7.0', '~> 6.1']
+        rails-version: ['~> 7.0', '~> 6.1']
         orm:
           - adapter: active_record
           - adapter: mongoid
@@ -17,6 +17,15 @@ jobs:
             mongoid-version: 8.0.6
           - adapter: mongoid
             mongoid-version: 7.5.4
+        include:
+          - rails-version: '~> 7.1'
+            ruby-version: '3.1'
+            orm:
+              adapter: active_record
+          - rails-version: '~> 7.1'
+            ruby-version: '3.2'
+            orm:
+              adapter: active_record
     env:
       RAILS_VERSION: ${{ matrix.rails-version  || '~> 7.0'}}
       MONGOID_VERSION: ${{ matrix.orm.mongoid-version || '8.1.2'}}
