@@ -4,9 +4,9 @@ gemspec
 
 gem 'rspec'
 gem 'simplecov'
-gem 'activerecord', ENV['AR_VERSION'] || '~> 7.0'
+gem 'activerecord'
 gem 'sqlite3'
-gem 'rails'
+gem 'rails', ENV['RAILS_VERSION'] || '~> 7.0'
 
 if ENV['ORM'] == 'mongoid'
   gem 'mongoid', ENV['MONGOID_VERSION'] || '~> 7.5'

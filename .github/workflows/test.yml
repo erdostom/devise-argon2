@@ -8,20 +8,18 @@ jobs:
     strategy:
       matrix:
         ruby-version: ['2.7', '3.0', '3.1', '3.2', 'ruby-head']
+        rails-version: ['~> 7.1', '~> 7.0', '~> 6.1']
         orm:
           - adapter: active_record
-            ar_version: 7.1.1
-          - adapter: active_record
-            ar_version: 7.0.8
           - adapter: mongoid
-            mongoid_version: 8.1.2
+            mongoid-version: 8.1.2
           - adapter: mongoid
-            mongoid_version: 8.0.6
+            mongoid-version: 8.0.6
           - adapter: mongoid
-            mongoid_version: 7.5.4
+            mongoid-version: 7.5.4
     env:
-      AR_VERSION: ${{ matrix.orm.ar_version  || '7.0.8'}}
-      MONGOID_VERSION: ${{ matrix.orm.mongoid_version || '8.1.2'}}
+      RAILS_VERSION: ${{ matrix.rails-version  || '~> 7.0'}}
+      MONGOID_VERSION: ${{ matrix.orm.mongoid-version || '8.1.2'}}
       ORM: ${{ matrix.orm.adapter }}
     steps:
     - uses: actions/checkout@v4
