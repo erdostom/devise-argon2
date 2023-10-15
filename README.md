@@ -101,6 +101,10 @@ Please note that this works only if your database table has a field `password_sa
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+## Contributors
+
+Please see here for full list of contributors: https://github.com/erdostom/devise-argon2/graphs/contributors
+
 ## License
 
 Released under MIT License.
