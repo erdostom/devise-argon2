@@ -1,4 +1,5 @@
 ORM = (ENV['ORM'] || 'active_record')
+p ENV['ORM']
 
 require "rails"
 require "active_record/railtie" if ORM == 'active_record'

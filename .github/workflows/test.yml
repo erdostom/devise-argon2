@@ -8,10 +8,21 @@ jobs:
     strategy:
       matrix:
         ruby-version: ['2.7', '3.0', '3.1', '3.2', 'ruby-head']
-        env:
-          - ORM=active_record
-          - ORM=mongoid
-
+        orm:
+          - adapter: active_record
+            ar_version: 7.1.1
+          - adapter: active_record
+            ar_version: 7.0.8
+          - adapter: mongoid
+            mongoid_version: 8.1.2
+          - adapter: mongoid
+            mongoid_version: 8.0.6
+          - adapter: mongoid
+            mongoid_version: 7.5.4
+    env:
+      AR_VERSION: ${{ matrix.orm.ar_version  || '7.0.8'}}
+      MONGOID_VERSION: ${{ matrix.orm.mongoid_version || '8.1.2'}}
+      ORM: ${{ matrix.orm.adapter }}
     steps:
     - uses: actions/checkout@v4
     - name: Set up Ruby ${{ matrix.ruby-version }}
@@ -20,7 +31,7 @@ jobs:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true
     - uses: supercharge/mongodb-github-action@1.10.0
-      if: ${{ matrix.env == 'ORM=mongoid' }}
+      if: ${{ matrix.orm.adapter == 'mongoid' }}
     - name: Setup rails test environment
       run: |
         cd spec/rails_app
