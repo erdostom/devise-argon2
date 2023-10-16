@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## [2.0.0] - 2023-10-16
+
 ### Added
 - Expose Argon2 options for configuring hashing work factors
 - Add support for migration v1 hashes
@@ -17,4 +19,5 @@
 - Remove `devise-encryptable` dependency
 - Remove superflous dependency on devise `password_salt` column
 
+Thank you to @moritzhoeppner for the significant contributions to this release!
 
