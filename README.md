@@ -1,5 +1,6 @@
 # devise-argon2 
 [![Gem Version](https://badge.fury.io/rb/devise-argon2.svg)](https://badge.fury.io/rb/devise-argon2)
+![](https://github.com/erdostom/devise-argon2/actions/workflows/test.yml/badge.svg)
 
 A ruby gem that gives Devise models which use `database_authenticatable` the ability to hash
 passwords with Argon2id.
