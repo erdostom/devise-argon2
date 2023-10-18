@@ -58,21 +58,33 @@ module Devise
       end
 
       def outdated_work_factors?
+        hash_format = ::Argon2::HashFormat.new(encrypted_password)
+        current_work_factors = {
+          t_cost: hash_format.t_cost,
+          m_cost: hash_format.m_cost,
+          p_cost: hash_format.p_cost
+        }
+        current_work_factors != configured_work_factors
+      end
+
+      def configured_work_factors
         # Since version 2.3.0 the argon2 gem exposes the default work factors via constants, see
         # https://github.com/technion/ruby-argon2/commit/d62ecf8b4ec6b8c1651fade5a5ebdc856e8aef42
-        default_t_cost = defined?(::Argon2::Password::DEFAULT_T_COST) ? ::Argon2::Password::DEFAULT_T_COST : 2
-        default_m_cost = defined?(::Argon2::Password::DEFAULT_M_COST) ? ::Argon2::Password::DEFAULT_M_COST : 16
-        default_p_cost = defined?(::Argon2::Password::DEFAULT_P_COST) ? ::Argon2::Password::DEFAULT_P_COST : 1
+        work_factors = {
+          t_cost: defined?(::Argon2::Password::DEFAULT_T_COST) ? ::Argon2::Password::DEFAULT_T_COST : 2,
+          m_cost: defined?(::Argon2::Password::DEFAULT_M_COST) ? ::Argon2::Password::DEFAULT_M_COST : 16,
+          p_cost: defined?(::Argon2::Password::DEFAULT_P_COST) ? ::Argon2::Password::DEFAULT_P_COST : 1
+        }.merge(self.class.argon2_options.slice(:t_cost, :m_cost, :p_cost))
 
-        current_t_cost = self.class.argon2_options[:t_cost] || default_t_cost
-        current_m_cost = self.class.argon2_options[:m_cost] || default_m_cost
-        current_p_cost = self.class.argon2_options[:p_cost] || default_p_cost
-        
-        hash_format = ::Argon2::HashFormat.new(encrypted_password)
+        # Since version 2.3.0 the argon2 gem supports defining work factors with named profiles, see
+        # https://github.com/technion/ruby-argon2/commit/6312a8fb3a6c6c5e771a736572e63d47485e8613
+        if self.class.argon2_options[:profile] && defined?(::Argon2::Profiles)
+          work_factors.merge!(::Argon2::Profiles[self.class.argon2_options[:profile]])
+        end
 
-        hash_format.t_cost != current_t_cost ||
-          hash_format.m_cost != (1 << current_m_cost) ||
-          hash_format.p_cost != current_p_cost
+        work_factors[:m_cost] = (1 << work_factors[:m_cost])
+
+        work_factors
       end
 
       def migrate_hash_from_devise_argon2_v1?
