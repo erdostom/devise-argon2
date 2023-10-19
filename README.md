@@ -40,7 +40,7 @@ or `secret` to `Argon2::Password.new`. These parameters can be set like this:
 class User < ApplicationRecord
   devise :database_authenticatable,
     :argon2,
-    argon2_options: {  t_cost: 3, p_cost: 2 }
+    argon2_options: { t_cost: 3, p_cost: 2 }
 end
 ```
 

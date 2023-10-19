@@ -9,6 +9,7 @@ jobs:
       matrix:
         ruby-version: ['2.7', '3.0', '3.1', '3.2', 'ruby-head']
         rails-version: ['~> 7.0', '~> 6.1']
+        argon2-version: ['2.2', '2.3']
         orm:
           - adapter: active_record
           - adapter: mongoid
@@ -18,18 +19,36 @@ jobs:
           - adapter: mongoid
             mongoid-version: 7.5.4
         include:
+          - rails-version: '~> 6.1'
+            ruby-version: '3.1'
+            argon2-version: '2.3'
+            devise-version: '4.8'
+            orm:
+              adapter: active_record
           - rails-version: '~> 7.1'
             ruby-version: '3.1'
+            argon2-version: '2.3'
+            devise-version: '4.9'
             orm:
               adapter: active_record
           - rails-version: '~> 7.1'
             ruby-version: '3.2'
+            argon2-version: '2.3'
+            devise-version: '4.9'
+            orm:
+              adapter: active_record
+          - rails-version: '~> 7.1'
+            ruby-version: '3.1'
+            argon2-version: '2.1'
+            devise-version: '4.9'
             orm:
               adapter: active_record
     env:
       RAILS_VERSION: ${{ matrix.rails-version  || '~> 7.0'}}
       MONGOID_VERSION: ${{ matrix.orm.mongoid-version || '8.1.2'}}
       ORM: ${{ matrix.orm.adapter }}
+      ARGON2_VERSION: ${{ matrix.argon2-version }}
+      DEVISE_VERSION: ${{ matrix.devise-version || '~> 4.9' }}
     steps:
     - uses: actions/checkout@v4
     - name: Set up Ruby ${{ matrix.ruby-version }}
