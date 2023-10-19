@@ -174,6 +174,55 @@ describe Devise::Models::Argon2 do
             .to({ m_cost: 1 << 4, t_cost: 3, p_cost: 2 })
         )
       end
+
+      if Argon2::VERSION >= '2.3.0'
+        it 'updates work factors if they changed via profile option' do
+          # Build user with argon2 default work factors (which match the RFC_9106_LOW_MEMORY
+          # profile.)
+          Devise.argon2_options = {}
+          user
+
+          Devise.argon2_options = { profile: :pre_rfc_9106 }
+          
+          expect{ user.valid_password?(CORRECT_PASSWORD) }.to(
+            change{ work_factors(user.encrypted_password) }
+              .to(
+                {
+                  m_cost: 1 << Argon2::Profiles[:pre_rfc_9106][:m_cost],
+                  t_cost: Argon2::Profiles[:pre_rfc_9106][:t_cost],
+                  p_cost: Argon2::Profiles[:pre_rfc_9106][:p_cost]
+                }
+              )
+          )
+        end
+
+        it 'gives precendence to the profile option over explicit configuration of work factors' do
+          Devise.argon2_options = {
+            m_cost: Argon2::Profiles[:pre_rfc_9106][:m_cost] + 1,
+            t_cost: Argon2::Profiles[:pre_rfc_9106][:t_cost] + 1,
+            p_cost: Argon2::Profiles[:pre_rfc_9106][:p_cost] + 1
+          }
+          user # build user
+
+          Devise.argon2_options = {
+            profile: :pre_rfc_9106,
+            m_cost: Argon2::Profiles[:pre_rfc_9106][:m_cost] + 1,
+            t_cost: Argon2::Profiles[:pre_rfc_9106][:t_cost] + 1,
+            p_cost: Argon2::Profiles[:pre_rfc_9106][:p_cost] + 1
+          }
+          
+          expect{ user.valid_password?(CORRECT_PASSWORD) }.to(
+            change{ work_factors(user.encrypted_password) }
+              .to(
+                {
+                  m_cost: 1 << Argon2::Profiles[:pre_rfc_9106][:m_cost],
+                  t_cost: Argon2::Profiles[:pre_rfc_9106][:t_cost],
+                  p_cost: Argon2::Profiles[:pre_rfc_9106][:p_cost]
+                }
+              )
+          )
+        end
+      end
     end
 
     it 'ignores migrate_from_devise_argon2_v1 if password_salt is not present' do
