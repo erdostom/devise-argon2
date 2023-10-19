@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## [2.0.1] - 2023-10-18
+
+### Added
+- Add Argon2 and devise to the test suite
+- Add @moritzhoeppner as an author
+
+### Fixed
+- Fix work factors implementation
+
 ## [2.0.0] - 2023-10-16
 
 ### Added
