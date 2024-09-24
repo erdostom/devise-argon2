@@ -19,6 +19,7 @@ describe Devise::Models::Argon2 do
       p_cost: DEFAULT_P_COST
     }
     User.destroy_all
+    OldUser.destroy_all
   end
 
   def work_factors(hash)
@@ -126,6 +127,14 @@ describe Devise::Models::Argon2 do
 
       it 'does not update the hash if an invalid password is given' do
         expect{ user.valid_password?(INCORRECT_PASSWORD) }.not_to(change(user, :encrypted_password))
+      end
+
+      it 'does not send password change notification emails on hash updates' do
+        user.email = 'test@example.com'
+        user.save!
+        Devise.send_password_change_notification = true
+        expect{ user.valid_password?(CORRECT_PASSWORD) }
+          .not_to(change { ActionMailer::Base.deliveries.count })
       end
     end
 
