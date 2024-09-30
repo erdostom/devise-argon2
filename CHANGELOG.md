@@ -1,6 +1,14 @@
-# Changelog 
+# Changelog
 
 ## Unreleased
+
+## [2.0.2] - 2024-09-30
+
+### Changed
+- When migrating users from v1 to v2, the `encrypted_password` update will no longer trigger callbacks (ie send email to users)
+
+### Added
+- Tests for newer dependency versions
 
 ## [2.0.1] - 2023-10-18
 
@@ -19,12 +27,12 @@
 - Add support for migrating bcrypt hashes
 - Add tests for Mongoid
 - Add Changelog :)
- 
+
 ### Changed
 - Change salting / peppering mechanism
 - Change CI from Travis to GitHub Actions
- 
-### Removed 
+
+### Removed
 - Remove `devise-encryptable` dependency
 - Remove superflous dependency on devise `password_salt` column
 
