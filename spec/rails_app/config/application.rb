@@ -20,5 +20,7 @@ module DummyRailsApp
     config.eager_load = false
     config.autoload_paths.reject!{ |p| p =~ /\/app\/(\w+)$/ && !%w(controllers helpers mailers views).include?($1) }
     config.autoload_paths += ["#{config.root}/app/#{ORM}"]
+    config.action_mailer.delivery_method = :test
+    config.action_mailer.default_options = { from: 'test@example.com' }
   end
 end

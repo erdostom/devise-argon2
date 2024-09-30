@@ -53,8 +53,19 @@ module Devise
         attributes = { encrypted_password: password_digest(password) }
         attributes[:password_salt] = nil if migrate_hash_from_devise_argon2_v1?
 
-        self.assign_attributes(attributes)
-        self.save if self.persisted?
+        if self.persisted?
+          update_without_callbacks(attributes)
+        else
+          self.assign_attributes(attributes)
+        end
+      end
+
+      def update_without_callbacks(attributes)
+        if defined?(Mongoid) && Mongoid.models.include?(self.class)
+          self.set(attributes)
+        else
+          self.update_columns(attributes)
+        end
       end
 
       def outdated_work_factors?
