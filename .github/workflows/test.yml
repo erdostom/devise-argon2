@@ -79,6 +79,11 @@ jobs:
       ARGON2_VERSION: ${{ matrix.argon2-version }}
       DEVISE_VERSION: ${{ matrix.devise-version || '~> 4.9' }}
     steps:
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
     - uses: actions/checkout@v4
     - name: Set up Ruby ${{ matrix.ruby-version }}
       uses: ruby/setup-ruby@v1
