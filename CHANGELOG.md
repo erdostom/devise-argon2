@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## [2.0.3] - 2025-03-23
+
+### Fixed
+- Fix bug where users would not be migrated from v1 when setting a password manually. (#21)
+
 ## [2.0.2] - 2024-09-30
 
 ### Changed
