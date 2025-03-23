@@ -302,4 +302,38 @@ describe Devise::Models::Argon2 do
       )
     end
   end
+
+  describe 'password reset' do
+    NEW_PASSWORD = 'new password'
+
+    shared_examples 'ways of resetting the password' do
+      it 'can be done via password_reset' do
+        user.reset_password(NEW_PASSWORD, NEW_PASSWORD)
+        expect(user.valid_password?(NEW_PASSWORD)).to be true
+      end
+
+      it 'can be done via password=' do
+        user.password = NEW_PASSWORD
+        expect(user.valid_password?(NEW_PASSWORD)).to be true
+      end
+    end
+
+    context 'encrypted_password is hashed with the current version of devise-argon2' do
+      include_examples 'ways of resetting the password'
+    end
+
+    context 'encrypted_password is hashed with version 1 of devise-argon2' do
+      let(:user) { OldUser.new(password: CORRECT_PASSWORD) }
+
+      before do
+        Devise.argon2_options.merge!({ migrate_from_devise_argon2_v1: true })
+        user.password_salt = 'devise-argon2 v1 salt'
+        user.encrypted_password = ::Argon2::Password.create(
+          "#{CORRECT_PASSWORD}#{user.password_salt}#{Devise.pepper}"
+        )
+      end
+
+      include_examples 'ways of resetting the password'
+    end
+  end
 end

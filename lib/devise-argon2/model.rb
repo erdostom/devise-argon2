@@ -38,6 +38,11 @@ module Devise
         is_valid
       end
 
+      def password=(new_password)
+        self.password_salt = nil if migrate_hash_from_devise_argon2_v1?
+        super
+      end
+
       protected
 
       def password_digest(password)
