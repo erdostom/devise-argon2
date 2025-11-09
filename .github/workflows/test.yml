@@ -10,6 +10,7 @@ jobs:
         ruby-version: ['3.1', '3.2', '3.3', '3.4']
         rails-version: ['~> 7.2', '~> 8.0', '~> 8.1']
         argon2-version: ['2.2', '2.3']
+        devise-version: ['~> 4.9', 'main']
         orm:
           - adapter: active_record
           - adapter: mongoid

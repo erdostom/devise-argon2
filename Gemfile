@@ -7,7 +7,12 @@ gem 'simplecov'
 gem 'activerecord'
 gem 'rails', ENV['RAILS_VERSION'] || '~> 8.0'
 gem 'argon2', ENV['ARGON2_VERSION'] || '~> 2.3'
-gem 'devise', ENV['DEVISE_VERSION'] || '~> 4.9'
+
+if ENV['DEVISE_VERSION'] == 'main'
+  gem 'devise', github: 'heartcombo/devise'
+else
+  gem 'devise', ENV['DEVISE_VERSION'] || '~> 4.9'
+end
 
 if ENV['ORM'] == 'mongoid'
   gem 'mongoid', ENV['MONGOID_VERSION'] || '~> 7.5'
