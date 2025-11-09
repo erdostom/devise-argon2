@@ -13,15 +13,12 @@ jobs:
         orm:
           - adapter: active_record
           - adapter: mongoid
-            mongoid-version: 9.0.2
+            mongoid-version: 9.0.3
           - adapter: mongoid
-            mongoid-version: 8.1.6
+            mongoid-version: 8.1.7
         exclude:
           - rails-version: '~> 8.0'
             ruby-version: '3.1'
-          - orm:
-              adapter: mongoid
-            rails-version: '~> 8.0'
     env:
       RAILS_VERSION: ${{ matrix.rails-version  || '~> 8.0'}}
       MONGOID_VERSION: ${{ matrix.orm.mongoid-version || '8.1.6'}}
