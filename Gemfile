@@ -18,8 +18,3 @@ if ENV['RAILS_VERSION'] == '~> 8.0'
 else
   gem 'sqlite3', '~> 1.6', '>= 1.6.6'
 end
-
-if ['~> 6.1', '~> 7.0'].include? ENV['RAILS_VERSION']
-  gem 'concurrent-ruby', '1.3.4'
-end
-
