@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Changed
+- Default the development bundle to Rails 8.1, Devise 5.0, and Mongoid 9.1.
+- Add Ruby 4.0 and released Devise 5.0 to CI while retaining older-version compatibility checks.
+- Constrain CI dependencies to distinct minor series and use the latest patch releases.
+- Test Mongoid 9.1 with Rails 8.1 and retain focused checks for Mongoid 8.1, Argon2 2.2, and Devise main.
+- Update CI actions and remove the Docker Hub login requirement so fork pull requests can run tests.
+
+### Added
+- Database persistence checks for BCrypt/v1 hash migrations and password resets on both ORMs.
+- Instructions for running the compatibility suite locally.
+
+### Fixed
+- Add missing password recovery fields to the Mongoid test models.
+- Isolate Devise settings between examples and remove a duplicate test constant definition.
+
 ## [2.0.3] - 2025-03-23
 
 ### Fixed
@@ -42,4 +57,3 @@
 - Remove superflous dependency on devise `password_salt` column
 
 Thank you to @moritzhoeppner for the significant contributions to this release!
-
