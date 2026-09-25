@@ -11,8 +11,22 @@ describe Devise::Models::Argon2 do
 
   let(:user) { User.new(password: CORRECT_PASSWORD) }
 
+  around do |example|
+    original_pepper = Devise.pepper
+    original_options = Devise.argon2_options
+    original_notification = Devise.send_password_change_notification
+    begin
+      example.run
+    ensure
+      Devise.pepper = original_pepper
+      Devise.argon2_options = original_options
+      Devise.send_password_change_notification = original_notification
+    end
+  end
+
   before do
     Devise.pepper = nil
+    Devise.send_password_change_notification = false
     Devise.argon2_options = {
       m_cost: DEFAULT_M_COST,
       t_cost: DEFAULT_T_COST,
@@ -39,6 +53,33 @@ describe Devise::Models::Argon2 do
 
       it 'does not validate an incorrect password' do
         expect(user.valid_password?(INCORRECT_PASSWORD)).to be false
+      end
+    end
+
+    shared_examples 'a persisted hash migration' do
+      before do
+        user.email = 'test@example.com'
+        user.save!
+        user.reload
+      end
+
+      it 'persists the migrated hash and does not rehash on the next login' do
+        expect(user.valid_password?(CORRECT_PASSWORD)).to be true
+        migrated_hash = user.encrypted_password
+
+        expect(user.reload.encrypted_password).to eq(migrated_hash)
+        expect(Argon2::Password.verify_password(CORRECT_PASSWORD, migrated_hash, 'argon2 secret')).to be true
+        expect(user.password_salt).to be_nil if user.respond_to?(:password_salt)
+        expect { user.valid_password?(CORRECT_PASSWORD) }.not_to change { user.reload.encrypted_password }
+      end
+
+      it 'leaves the stored hash unchanged after a failed login' do
+        expect { user.valid_password?(INCORRECT_PASSWORD) }.not_to change { user.reload.encrypted_password }
+      end
+
+      it 'does not run password change notifications while migrating' do
+        Devise.send_password_change_notification = true
+        expect { user.valid_password?(CORRECT_PASSWORD) }.not_to change { ActionMailer::Base.deliveries.count }
       end
     end
 
@@ -75,6 +116,7 @@ describe Devise::Models::Argon2 do
       end
 
       include_examples 'a password is validated if and only if it is correct'
+      it_behaves_like 'a persisted hash migration'
 
       it 'updates hash if valid password is given' do
         expect{ user.valid_password?(CORRECT_PASSWORD) }.to(change(user, :encrypted_password))
@@ -109,6 +151,7 @@ describe Devise::Models::Argon2 do
       end
 
       include_examples 'a password is validated if and only if it is correct'
+      it_behaves_like 'a persisted hash migration'
 
       it 'updates hash once if valid password is given' do
         expect{ user.valid_password?(CORRECT_PASSWORD) }.to(
@@ -308,13 +351,22 @@ describe Devise::Models::Argon2 do
 
     shared_examples 'ways of resetting the password' do
       it 'can be done via password_reset' do
-        user.reset_password(NEW_PASSWORD, NEW_PASSWORD)
+        user.save!
+        expect(user.reset_password(NEW_PASSWORD, NEW_PASSWORD)).to be true
+        user.reload
         expect(user.valid_password?(NEW_PASSWORD)).to be true
+        expect(user.valid_password?(CORRECT_PASSWORD)).to be false
+        expect(user.password_salt).to be_nil if user.respond_to?(:password_salt)
       end
 
       it 'can be done via password=' do
+        user.save!
         user.password = NEW_PASSWORD
+        user.save!
+        user.reload
         expect(user.valid_password?(NEW_PASSWORD)).to be true
+        expect(user.valid_password?(CORRECT_PASSWORD)).to be false
+        expect(user.password_salt).to be_nil if user.respond_to?(:password_salt)
       end
     end
 

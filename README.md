@@ -11,6 +11,27 @@ passwords with Argon2id.
 bundle add devise-argon2
 ```
 
+## Compatibility
+
+The development bundle defaults to Rails 8.1, Devise 5.0, and Argon2 2.3. As of
+September 25, 2026, the latest stable releases are
+[Ruby 4.0.7](https://www.ruby-lang.org/en/downloads/),
+[Rails 8.1.4](https://rubyonrails.org/category/releases), and
+[Devise 5.0.4](https://rubygems.org/gems/devise).
+
+CI tests the latest patch releases in each of these series:
+
+| Dependency | Versions in CI |
+| --- | --- |
+| Ruby | 3.1, 3.2, 3.3, 3.4, 4.0 |
+| Rails | 7.2, 8.0, 8.1 (Rails 8 requires Ruby 3.2+) |
+| Devise | 4.9, 5.0; `main` on Ruby 4.0 / Rails 8.1 |
+| ORM | Active Record and Mongoid 9.1 |
+| Additional compatibility checks | Argon2 2.2 on Ruby 3.4 / Rails 8.1; Mongoid 8.1 on Ruby 3.4 / Rails 8.0 |
+
+Older Ruby versions remain in CI for compatibility. The gem's runtime
+dependency requirements are unchanged.
+
 ## Usage
 
 Add `devise :argon2` to your Devise model. For example:
@@ -122,6 +143,44 @@ in with their current passwords.
 
 
 ## Contributing
+
+### Running the tests
+
+Use Ruby 3.2 or newer for the default Rails 8.1 bundle:
+
+```sh
+bundle install
+(cd spec/rails_app && RAILS_ENV=test bundle exec rails db:prepare)
+bundle exec rspec --order random
+```
+
+To test Mongoid, start MongoDB on `localhost:27017`, then run:
+
+```sh
+export ORM=mongoid
+bundle install
+bundle exec rspec --order random
+```
+
+The Mongoid suite uses the `dummy_rails_app_test` database. The test suite clears
+its user collections between examples. CI uses MongoDB 8.0.
+
+To test another dependency combination, set `RAILS_VERSION`, `DEVISE_VERSION`,
+`ARGON2_VERSION`, and/or `MONGOID_VERSION` before both installing and running
+tests. For example:
+
+```sh
+export ORM=active_record RAILS_VERSION='~> 7.2.4' DEVISE_VERSION='~> 4.9.0'
+bundle update
+(cd spec/rails_app && RAILS_ENV=test bundle exec rails db:prepare)
+bundle exec rspec --order random
+```
+
+Use three-part constraints such as `~> 8.0.0` to test a specific Rails minor
+series; `~> 8.0` also allows Rails 8.1. Set `DEVISE_VERSION=main` to test Devise's
+development branch.
+
+### Submitting changes
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
